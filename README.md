@@ -57,7 +57,7 @@ Any one of these stops automatic attachment:
 2. Environment variable `STAY_FRESH=off`
 3. The phrase "skip pair mode" in the prompt
 
-Hooks also stay silent when `CI` is set, and they fail open: any error means no injection.
+Hooks also stay silent when `CI` is set and in unattended Claude Code sessions (`claude -p`, the SDK), so scripted runs never stop at a handoff. Set `STAY_FRESH=on` to force them on anyway. They fail open: any error means no injection, and a config file that is not valid JSON also means no injection until it is fixed.
 
 ## State
 

@@ -6,8 +6,17 @@ import { matchPrompt, matchSkill, hasSkipPhrase, skillNameFromInput } from './li
 import { findProjectRoot } from './lib/root.mjs';
 import { shouldInject } from './lib/state.mjs';
 
-const isOff = (value) => String(value ?? '').toLowerCase() === 'off';
+const switchValue = (env) => String(env.STAY_FRESH ?? '').toLowerCase();
 const isCi = (value) => value !== undefined && !['', '0', 'false'].includes(String(value).toLowerCase());
+const isUnattended = (env) =>
+  env.CLAUDE_CODE_SESSION_ATTENDED === '0' || String(env.CLAUDE_CODE_ENTRYPOINT ?? '').startsWith('sdk');
+
+function suppressedByEnvironment(env) {
+  const forced = switchValue(env);
+  if (forced === 'off') return true;
+  if (forced === 'on') return false;
+  return isCi(env.CI) || isUnattended(env);
+}
 
 function findIntegration(input, integrations) {
   if (input.hook_event_name === 'UserPromptSubmit') {
@@ -49,7 +58,7 @@ function trigger(input, config) {
 }
 
 function main() {
-  if (isOff(process.env.STAY_FRESH) || isCi(process.env.CI)) return;
+  if (suppressedByEnvironment(process.env)) return;
   const input = JSON.parse(readFileSync(0, 'utf8'));
   const root = findProjectRoot({ cwd: input.cwd, env: process.env });
   const config = loadConfig({ projectDir: root, homeDir: homedir() });

@@ -19,7 +19,9 @@ function sandbox() {
 function run(input, { cwd, home }, envOver = {}) {
   const env = { ...process.env, HOME: home, USERPROFILE: home, ...envOver };
   for (const [k, v] of Object.entries(envOver)) if (v === undefined) delete env[k];
-  if (!('CLAUDE_PROJECT_DIR' in envOver)) delete env.CLAUDE_PROJECT_DIR;
+  for (const key of ['CLAUDE_PROJECT_DIR', 'CLAUDE_CODE_SESSION_ATTENDED', 'CLAUDE_CODE_ENTRYPOINT']) {
+    if (!(key in envOver)) delete env[key];
+  }
   if (!('CI' in envOver)) delete env.CI;
   if (!('STAY_FRESH' in envOver)) delete env.STAY_FRESH;
   const stdin = typeof input === 'string' ? input : JSON.stringify(input);
@@ -65,6 +67,26 @@ test('CI environments get no injection', () => {
   const s = sandbox();
   const r = run(prompt(s.cwd, '/speckit-implement'), s, { CI: 'true' });
   assert.deepEqual([r.status, r.out], [0, '']);
+});
+
+test('unattended Claude Code sessions get no injection', () => {
+  const s = sandbox();
+  const unattended = run(prompt(s.cwd, '/speckit-implement'), s, { CLAUDE_CODE_SESSION_ATTENDED: '0' });
+  assert.deepEqual([unattended.status, unattended.out], [0, '']);
+  const sdk = run(prompt(s.cwd, '/speckit-implement', 's2'), s, { CLAUDE_CODE_ENTRYPOINT: 'sdk-cli' });
+  assert.deepEqual([sdk.status, sdk.out], [0, '']);
+});
+
+test('attended interactive sessions inject', () => {
+  const s = sandbox();
+  const r = run(prompt(s.cwd, '/speckit-implement'), s, { CLAUDE_CODE_SESSION_ATTENDED: '1', CLAUDE_CODE_ENTRYPOINT: 'cli' });
+  assert.notEqual(r.out, '');
+});
+
+test('STAY_FRESH=on forces injection in an unattended session', () => {
+  const s = sandbox();
+  const r = run(prompt(s.cwd, '/speckit-implement'), s, { STAY_FRESH: 'on', CLAUDE_CODE_SESSION_ATTENDED: '0', CLAUDE_CODE_ENTRYPOINT: 'sdk-cli', CI: 'true' });
+  assert.notEqual(r.out, '');
 });
 
 test('malformed and empty stdin produce no output and exit 0', () => {

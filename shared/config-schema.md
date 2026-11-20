@@ -41,7 +41,7 @@ Any one of these stops automatic attachment:
 2. Environment variable `STAY_FRESH=off`. This is the guaranteed switch.
 3. The phrase "skip pair mode" in the prompt that triggers the attach.
 
-Hooks also stay silent when `CI` is set, and they fail open: any error means no injection.
+Hooks also stay silent when `CI` is set and when the session is unattended (`CLAUDE_CODE_SESSION_ATTENDED=0` or an `sdk` entrypoint, as in `claude -p`). `STAY_FRESH=on` forces them on. They fail open: any error means no injection.
 
 ## State file
 
