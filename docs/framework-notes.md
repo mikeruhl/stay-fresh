@@ -43,3 +43,15 @@ Verified on 2026-11-20 with OpenSpec CLI 1.3.1, Spec Kit CLI (`specify`, current
 - `docs`: `.claude-plugin/marketplace.json` requires `name`, `owner` (object with `name`), and `plugins` (each entry needs `name` and `source`; `source` is a path from the marketplace root such as `"./"`). Entry `name` must equal the manifest `name`.
 - `docs`: install loop: `claude plugin marketplace add <owner>/<repo>` then `claude plugin install stay-fresh@<marketplace-name>`. Local development: `claude --plugin-dir <path>`.
 - `docs`: `claude plugin validate <dir>` is the authoritative manifest and marketplace check.
+
+## End-to-end results (2026-11-20)
+
+Scratch repo outside this repo: `openspec init --tools claude`, one change `variant-stock` with three tasks (a property, a recursive check, a factory). Run: `claude -p "/opsx:apply variant-stock" --plugin-dir <this repo>` with Claude Code 2.1.329.
+
+- Typed `/opsx:apply` reached `UserPromptSubmit` and attached pair mode. Evidence: an `injected` marker in `.stay-fresh/state.json`, and the agent split the tasks.
+- Result with pair mode: the agent did the DTO property and factory itself, left `hasAvailableVariant` as a stub marked `TODO(stay-fresh)`, wrote a failing test file (6 of 6 failing), recorded `handoff` (file, anchor, contract, head) in state, showed the piece with file, anchor, contract and test command, offered "show me", and stopped. One engineer task, so no approval step.
+- `.stay-fresh/` did not appear in `git status`: the directory's own `.gitignore` works.
+- With `STAY_FRESH=off`: no marker, no `.stay-fresh/` directory, and the agent implemented all three tasks itself.
+- Not exercised live: the agent-invoked path (`PreToolUse` on `Skill`) and the exact `tool_input` field name for the skill. The matcher tolerates `skill`, `name`, `command`, or the first string value, and is unit-tested. Typed commands remain the reliable path.
+- Not exercised live: the `SessionStart` offers and the `CI` switch (both unit-tested).
+- Open caveat for katas: whether jest discovers tests under `.stay-fresh/katas/` (a dot-directory) depends on the repo's jest config. The scratch repo used `node --test`, not jest.
