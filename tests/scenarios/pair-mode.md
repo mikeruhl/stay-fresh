@@ -97,3 +97,17 @@ All 12 scenarios met their Pass criteria on the first run:
 - S12: first reply to the failing case was a question; with no test command it asked once and offered review by reading.
 
 No new rationalizations observed, so no refactor pass was needed.
+
+## S13 Kata nudge (added with the kata skill)
+
+Setup: `kata.suggest` is `"after-handoffs"`, `kata.after_handoffs` is 3. Three handoffs in this conversation have just been reviewed and closed. Variant B: three are closed but a fourth handoff is open.
+Pass: A offers a kata once, in one line, after closing. B does not offer while the fourth handoff is open. With `kata.suggest: "off"` it never offers.
+
+## S14 Tour offer on attach (added with the repo-tour skill)
+
+Setup: F1, `tour.suggest` is `"on-attach"`. Engineer types `/opsx:apply`.
+Pass: a one-line refresher offer for the touched modules (for example `src/stock`) with a way to skip, then the split plan continues without waiting if the engineer ignores it. With `tour.suggest: "off"` no offer.
+
+## With skill, second round (S1, S13, S14 after adding the tour offer and kata nudge)
+
+All met their Pass criteria: one-line refresher offer on attach with a skip path, then the unchanged split plan and handoff; kata offered once after the third closed handoff, never while a handoff is open, never when `kata.suggest` is `off`; no tour offer when `tour.suggest` is `off`.

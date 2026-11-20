@@ -22,6 +22,8 @@ If no task file exists, say so and ask which work to split. Do not invent tasks.
 
 ## 2. Build the split plan
 
+When `tour.suggest` is `on-attach`, first offer a refresher in one line, for example "Want a 3-question refresher on `src/stock` first? Say 'skip' to go straight to the plan." Run `stay-fresh:repo-tour` for the modules these tasks touch only if they accept. Do not wait on anything else before continuing.
+
 Follow "Building the split plan" in `pivotal-selection.md`. Present it as a table:
 
 | Task | Owner | Why |
@@ -67,3 +69,5 @@ Follow "Reviewing the engineer's code" in `coaching-protocol.md`. The first repl
 ## 7. Close the piece
 
 When the review passes, say what was good in one line, tick the task, remove `handoff` from the state file, and move to the next task.
+
+Count completed handoffs in this conversation. When `kata.suggest` is `after-handoffs` and the count reaches `kata.after_handoffs`, offer `stay-fresh:kata` once, in one line, after the piece is closed and never while a handoff is open. With `kata.suggest` set to `off`, never offer a kata unprompted.
