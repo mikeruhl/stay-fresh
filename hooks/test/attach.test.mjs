@@ -116,12 +116,44 @@ test('paths containing spaces work', () => {
   assert.notEqual(run(prompt(s.cwd, '/speckit-implement'), s).out, '');
 });
 
-test('hooks.json registers both events in exec form', () => {
+const sessionStart = (cwd, session = 's1') => ({
+  hook_event_name: 'SessionStart', session_id: session, cwd,
+});
+
+test('SessionStart offers a tour when tour.suggest is session-start', () => {
+  const s = sandbox();
+  writeFileSync(join(s.cwd, '.stay-fresh.json'), JSON.stringify({ tour: { suggest: 'session-start' } }));
+  const out = JSON.parse(run(sessionStart(s.cwd), s).out).hookSpecificOutput;
+  assert.equal(out.hookEventName, 'SessionStart');
+  assert.match(out.additionalContext, /stay-fresh:repo-tour/);
+  assert.doesNotMatch(out.additionalContext, /stay-fresh:kata/);
+});
+
+test('SessionStart offers a kata when kata.suggest is session-start', () => {
+  const s = sandbox();
+  writeFileSync(join(s.cwd, '.stay-fresh.json'), JSON.stringify({ kata: { suggest: 'session-start' } }));
+  const out = JSON.parse(run(sessionStart(s.cwd), s).out).hookSpecificOutput;
+  assert.match(out.additionalContext, /stay-fresh:kata/);
+});
+
+test('SessionStart is silent with default settings, when disabled, and on repeat', () => {
+  const s = sandbox();
+  assert.equal(run(sessionStart(s.cwd), s).out, '');
+  writeFileSync(join(s.cwd, '.stay-fresh.json'), JSON.stringify({ tour: { suggest: 'session-start' } }));
+  assert.notEqual(run(sessionStart(s.cwd), s).out, '');
+  assert.equal(run(sessionStart(s.cwd), s).out, '');
+  assert.equal(run(sessionStart(s.cwd, 's2'), s, { STAY_FRESH: 'off' }).out, '');
+  writeFileSync(join(s.cwd, '.stay-fresh.json'), JSON.stringify({ enabled: false, tour: { suggest: 'session-start' } }));
+  assert.equal(run(sessionStart(s.cwd, 's3'), s).out, '');
+});
+
+test('hooks.json registers all three events in exec form', () => {
   const cfg = JSON.parse(readFileSync(hooksJson, 'utf8')).hooks;
   const submit = cfg.UserPromptSubmit[0].hooks[0];
+  const start = cfg.SessionStart[0].hooks[0];
   const pre = cfg.PreToolUse[0];
   assert.equal(pre.matcher, 'Skill');
-  for (const h of [submit, pre.hooks[0]]) {
+  for (const h of [submit, start, pre.hooks[0]]) {
     assert.equal(h.type, 'command');
     assert.equal(h.command, 'node');
     assert.deepEqual(h.args, ['${CLAUDE_PLUGIN_ROOT}/hooks/attach.mjs']);

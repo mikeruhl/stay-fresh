@@ -27,23 +27,43 @@ function contextFor(integration) {
   ].join('\n');
 }
 
+function sessionStartContext(config) {
+  const lines = [];
+  if (config.tour.suggest === 'session-start') {
+    lines.push('stay-fresh: the engineer\'s settings suggest a short repo tour at session start. The stay-fresh:repo-tour skill runs it. A one-line offer that the engineer can skip is enough.');
+  }
+  if (config.kata.suggest === 'session-start') {
+    lines.push('stay-fresh: the engineer\'s settings suggest a kata at session start. The stay-fresh:kata skill runs it. A one-line offer that the engineer can skip is enough.');
+  }
+  return lines.join('\n');
+}
+
+function trigger(input, config) {
+  if (input.hook_event_name === 'SessionStart') {
+    const context = sessionStartContext(config);
+    return context ? { id: 'session-start', context } : null;
+  }
+  const integration = findIntegration(input, config.integrations);
+  return integration ? { id: integration.id, context: contextFor(integration) } : null;
+}
+
 function main() {
   if (isOff(process.env.STAY_FRESH) || isCi(process.env.CI)) return;
   const input = JSON.parse(readFileSync(0, 'utf8'));
   const config = loadConfig({ projectDir: input.cwd, homeDir: homedir() });
   if (!config.enabled) return;
-  const integration = findIntegration(input, config.integrations);
-  if (!integration) return;
+  const hit = trigger(input, config);
+  if (!hit) return;
   const allowed = shouldInject({
     stateDir: join(input.cwd, '.stay-fresh'),
     sessionId: String(input.session_id ?? 'unknown'),
-    triggerId: integration.id,
+    triggerId: hit.id,
   });
   if (!allowed) return;
   process.stdout.write(JSON.stringify({
     hookSpecificOutput: {
       hookEventName: input.hook_event_name,
-      additionalContext: contextFor(integration),
+      additionalContext: hit.context,
     },
   }));
 }

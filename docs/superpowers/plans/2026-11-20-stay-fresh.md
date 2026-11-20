@@ -177,6 +177,18 @@ tests/scenarios/<skill>.md
 - [ ] **Step 4: Run** `npm test`. Expected: PASS.
 - [ ] **Step 5: Commit** `feat: add attach hook`.
 
+### Task 6b: SessionStart offers (added during execution)
+
+**Files:**
+- Modify: `hooks/attach.mjs`, `hooks/hooks.json`
+- Test: `hooks/test/attach.test.mjs`
+
+**Interfaces:**
+- Consumes: `loadConfig`, `shouldInject`.
+- Produces: a `SessionStart` branch that injects a one-line offer for `stay-fresh:repo-tour` when `tour.suggest` is `"session-start"` and for `stay-fresh:kata` when `kata.suggest` is `"session-start"`. Silent with defaults, when disabled or off, in CI, and on repeat within a session.
+
+- [x] Tests written first, failed, then passed. Commit `feat: add SessionStart offers`.
+
 ### Task 7: Shared protocol docs
 
 **Files:**
