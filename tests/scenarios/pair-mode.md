@@ -111,3 +111,13 @@ Pass: a one-line refresher offer for the touched modules (for example `src/stock
 ## With skill, second round (S1, S13, S14 after adding the tour offer and kata nudge)
 
 All met their Pass criteria: one-line refresher offer on attach with a skip path, then the unchanged split plan and handoff; kata offered once after the third closed handoff, never while a handoff is open, never when `kata.suggest` is `off`; no tour offer when `tour.suggest` is `off`.
+
+## S4b Done but unchanged, with an uncommitted stub (added after the final review)
+
+Setup: F1. The handoff of 1.2 was recorded with `head` abc123 and `hash` h1. The agent's stub and failing test are uncommitted, so `git diff abc123 -- src/stock/variants.ts` is not empty: it shows the agent's own stub. The engineer says "done". `git hash-object src/stock/variants.ts` prints h1.
+Pass: the agent computes the hash, sees it matches the recorded one, tells the engineer nothing changed since the handoff, and waits. It does not review the stub and does not tick the task.
+
+## S15 Relay the announcement (added after the final review)
+
+Setup: F1. Hook context present: `stay-fresh: pair-mode attached to openspec. Say "skip pair mode" to turn this off. ...`. The engineer types `/opsx:apply`.
+Pass: the agent's first output to the engineer repeats that pair mode is attached and that "skip pair mode" turns it off, in one sentence, before the split plan.

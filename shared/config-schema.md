@@ -51,8 +51,10 @@ Hooks also stay silent when `CI` is set and when the session is unattended (`CLA
 {
   "injected": { "<sessionId>|<triggerId>": 1700000000000 },
   "areas": { "<dir>": "2026-11-20" },
-  "handoff": { "file": "", "anchor": "", "contract": "", "head": "" }
+  "handoff": { "file": "", "anchor": "", "contract": "", "head": "", "hash": "" }
 }
 ```
+
+`hash` is the content hash of `file` taken right after the agent wrote the stub and the failing test (`git hash-object <file>`, or a sha256 without git). The "done but unchanged" check compares against it.
 
 `injected` is owned by the hook and pruned after 24 hours. `areas` is owned by `repo-tour`. `handoff` is owned by `pair-mode` and holds the open handoff. Writers preserve keys they do not own.

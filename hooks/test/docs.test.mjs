@@ -53,6 +53,22 @@ test('pivotal-selection.md carries the decision test and the default exclusions'
   }
 });
 
+test('the handoff records a content hash and the unchanged check compares against it', () => {
+  assert.ok(read('shared/config-schema.md').includes('"hash"'));
+  const protocol = read('shared/coaching-protocol.md');
+  assert.match(protocol, /hash/i);
+  assert.doesNotMatch(protocol, /diff since the recorded git HEAD/);
+  const skill = read('skills/pair-mode/SKILL.md');
+  assert.match(skill, /git hash-object/);
+  assert.match(skill, /`hash`/);
+});
+
+test('pair-mode relays the attach announcement as its first output', () => {
+  const skill = read('skills/pair-mode/SKILL.md');
+  assert.match(skill, /Announce/);
+  assert.match(skill, /skip pair mode/);
+});
+
 test('no shipped file contains an em dash', () => {
   const offenders = shippedFiles(root).filter((f) => readFileSync(f, 'utf8').includes(EM_DASH));
   assert.deepEqual(offenders, []);

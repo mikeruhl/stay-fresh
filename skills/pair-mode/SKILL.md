@@ -14,7 +14,9 @@ Read before starting:
 
 Load config from `~/.claude/stay-fresh.json` over `.stay-fresh.json` over the defaults in the schema. If the engineer says "skip pair mode", stop using this skill and do the work normally.
 
-## 1. Find the work
+## 1. Announce, then find the work
+
+Announce first. When the hook context contains a line starting `stay-fresh: pair-mode attached`, repeat it to the engineer as your first output, in one sentence, including that they can say "skip pair mode" to turn this off. The engineer cannot see hook context.
 
 Use the task file named by the hook context (a glob such as `openspec/changes/*/tasks.md` or `specs/*/tasks.md`), or the work the engineer described.
 
@@ -45,7 +47,7 @@ Hand off one piece at a time, never several at once. For each:
 
 1. **Contract.** If the repo has a test setup, write the failing test that expresses the contract and run it to confirm it fails for the right reason. Without a test setup, state a prose contract: inputs, outputs, and the cases that must hold. Do not ask about adding test tooling.
 2. **Stub.** Leave the function or region as a stub marked `TODO(stay-fresh)`. Do not write the implementation.
-3. **Record.** Write the handoff to `.stay-fresh/state.json` under `handoff`: `file`, `anchor`, `contract`, and the current git `head`. Create `.stay-fresh/` with a `.gitignore` containing `*` if it does not exist. Preserve the other keys in the file.
+3. **Record.** Write the handoff to `.stay-fresh/state.json` under `handoff`: `file`, `anchor`, `contract`, the current git `head`, and `hash`, the output of `git hash-object <file>` taken after the stub and the failing test are written (a sha256 of the file when git is unavailable). Create `.stay-fresh/` with a `.gitignore` containing `*` if it does not exist. Preserve the other keys in the file.
 4. **Stop.** Tell the engineer the file, the anchor, and the contract. Ask them to write it and say "done". End the turn. Keep the piece within `max_lines_per_handoff`.
 
 ## 5. Review when they say done
