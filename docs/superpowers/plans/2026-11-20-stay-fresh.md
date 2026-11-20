@@ -273,7 +273,7 @@ tests/scenarios/<skill>.md
 **Interfaces:**
 - Consumes: all prior tasks.
 
-- [ ] **Step 1: Write `README.md`:** purpose and the source article, install via the marketplace file, the four skills, config reference link, the three off switches, SpecKit and OpenSpec attach behavior including the best-effort `PreToolUse` caveat from design call 5, license.
+- [ ] **Step 1: Write `README.md`:** purpose and a References section linking https://cekrem.github.io/posts/if-you-stop-writing-code-you-also-get-worse-at-reviewing-it/ (the source article, requested by the owner), install via the marketplace file, the four skills, config reference link, the three off switches, SpecKit and OpenSpec attach behavior including the best-effort `PreToolUse` caveat from design call 5, license.
 - [ ] **Step 2: Sandbox run.** In a scratch repo outside this one, create an OpenSpec-style change with a `tasks.md` of three tasks, install the plugin from this directory, type the apply command, and confirm: announcement line appears, split plan with reasons, one handoff, turn ends. Repeat with `STAY_FRESH=off` and with "skip pair mode". Record results in `docs/framework-notes.md`.
 - [ ] **Step 3: Run** `npm test`. Expected: all PASS.
 - [ ] **Step 4: Commit** `docs: add README and end-to-end results`. Ask the owner before pushing to `origin`.
