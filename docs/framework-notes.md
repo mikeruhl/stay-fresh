@@ -55,3 +55,11 @@ Scratch repo outside this repo: `openspec init --tools claude`, one change `vari
 - Not exercised live: the agent-invoked path (`PreToolUse` on `Skill`) and the exact `tool_input` field name for the skill. The matcher tolerates `skill`, `name`, `command`, or the first string value, and is unit-tested. Typed commands remain the reliable path.
 - Not exercised live: the `SessionStart` offers and the `CI` switch (both unit-tested).
 - Open caveat for katas: whether jest discovers tests under `.stay-fresh/katas/` (a dot-directory) depends on the repo's jest config. The scratch repo used `node --test`, not jest.
+
+## End-to-end results after the final review fixes (2026-11-20)
+
+Same scratch repo, run with `STAY_FRESH=on` because `claude -p` is an unattended session and attach is now skipped there by default (`CLAUDE_CODE_SESSION_ATTENDED=0`, `CLAUDE_CODE_ENTRYPOINT=sdk-cli`; an interactive session has `1` and `cli`).
+
+- The handoff record now includes `hash` (`git hash-object` of the stubbed file).
+- Continuing the same session with "done" while the file was untouched: the agent compared the hash, reported "hasn't changed since the handoff", did not review, and left task 1.2 unticked.
+- `claude -p` prints only the final message, so the relayed announcement is checked by simulation (scenario S15), not live.

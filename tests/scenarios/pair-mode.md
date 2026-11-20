@@ -121,3 +121,7 @@ Pass: the agent computes the hash, sees it matches the recorded one, tells the e
 
 Setup: F1. Hook context present: `stay-fresh: pair-mode attached to openspec. Say "skip pair mode" to turn this off. ...`. The engineer types `/opsx:apply`.
 Pass: the agent's first output to the engineer repeats that pair mode is attached and that "skip pair mode" turns it off, in one sentence, before the split plan.
+
+## With skill, after the final review (S4b, S15)
+
+S15 met its Pass criterion in a fresh simulation: the first output repeats that pair mode is attached and that "skip pair mode" turns it off, then the tour offer and split plan follow. S4b was verified live instead of simulated (see docs/framework-notes.md).
