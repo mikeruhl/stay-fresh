@@ -70,12 +70,12 @@ tests/scenarios/<skill>.md
 - Test: `hooks/test/manifest.test.mjs`
 
 **Interfaces:**
-- Produces: package script `npm test` running `node --test hooks/test`; plugin name `stay-fresh`.
+- Produces: package script `npm test` running `node --test`; plugin name `stay-fresh`.
 
 - [ ] **Step 1: Write the failing test** `manifest.test.mjs`: parses both manifests as JSON and asserts `plugin.name === "stay-fresh"`, `plugin.license === "MIT"`, the marketplace lists one plugin named `stay-fresh`, `package.json` has `"type": "module"`, and `LICENSE` starts with `MIT License`.
-- [ ] **Step 2: Run** `node --test hooks/test`. Expected: FAIL (files missing).
+- [ ] **Step 2: Run** `node --test`. Expected: FAIL (files missing).
 - [ ] **Step 3: Create the files.** `LICENSE`: MIT, 2026, Mike Ruhl. `package.json`: private, type module, `scripts.test` as above. `.gitignore`: `.stay-fresh/`, `node_modules/`. Manifest field names must follow the schema recorded in Task 2 (`docs/framework-notes.md`), so do Task 2 step 4 first if the schema is unknown.
-- [ ] **Step 4: Run** `node --test hooks/test`. Expected: PASS.
+- [ ] **Step 4: Run** `node --test`. Expected: PASS.
 - [ ] **Step 5: Commit** `feat: scaffold plugin manifests and license`.
 
 ### Task 2: Verify framework and Claude Code facts
