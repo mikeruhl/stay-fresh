@@ -3,6 +3,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { loadConfig } from './lib/config.mjs';
 import { matchPrompt, matchSkill, hasSkipPhrase, skillNameFromInput } from './lib/matcher.mjs';
+import { findProjectRoot } from './lib/root.mjs';
 import { shouldInject } from './lib/state.mjs';
 
 const isOff = (value) => String(value ?? '').toLowerCase() === 'off';
@@ -50,12 +51,13 @@ function trigger(input, config) {
 function main() {
   if (isOff(process.env.STAY_FRESH) || isCi(process.env.CI)) return;
   const input = JSON.parse(readFileSync(0, 'utf8'));
-  const config = loadConfig({ projectDir: input.cwd, homeDir: homedir() });
+  const root = findProjectRoot({ cwd: input.cwd, env: process.env });
+  const config = loadConfig({ projectDir: root, homeDir: homedir() });
   if (config._invalid || !config.enabled) return;
   const hit = trigger(input, config);
   if (!hit) return;
   const allowed = shouldInject({
-    stateDir: join(input.cwd, '.stay-fresh'),
+    stateDir: join(root, '.stay-fresh'),
     sessionId: String(input.session_id ?? 'unknown'),
     triggerId: hit.id,
   });

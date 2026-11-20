@@ -19,6 +19,7 @@ function sandbox() {
 function run(input, { cwd, home }, envOver = {}) {
   const env = { ...process.env, HOME: home, USERPROFILE: home, ...envOver };
   for (const [k, v] of Object.entries(envOver)) if (v === undefined) delete env[k];
+  if (!('CLAUDE_PROJECT_DIR' in envOver)) delete env.CLAUDE_PROJECT_DIR;
   if (!('CI' in envOver)) delete env.CI;
   if (!('STAY_FRESH' in envOver)) delete env.STAY_FRESH;
   const stdin = typeof input === 'string' ? input : JSON.stringify(input);
@@ -111,6 +112,18 @@ test('prose mentioning a trigger and non-trigger prompts stay silent', () => {
   const s = sandbox();
   assert.equal(run(prompt(s.cwd, 'explain /speckit-implement to me'), s).out, '');
   assert.equal(run(prompt(s.cwd, 'fix the login bug'), s).out, '');
+});
+
+test('config and state are read from the project root, not a subdirectory cwd', () => {
+  const s = sandbox();
+  mkdirSync(join(s.cwd, '.git'));
+  const sub = join(s.cwd, 'src', 'stock');
+  mkdirSync(sub, { recursive: true });
+  writeFileSync(join(s.cwd, '.stay-fresh.json'), JSON.stringify({ enabled: false }));
+  assert.equal(run(prompt(sub, '/speckit-implement'), s).out, '');
+  writeFileSync(join(s.cwd, '.stay-fresh.json'), JSON.stringify({}));
+  assert.notEqual(run(prompt(sub, '/speckit-implement'), s).out, '');
+  assert.equal(readFileSync(join(s.cwd, '.stay-fresh', 'state.json'), 'utf8').includes('speckit'), true);
 });
 
 test('paths containing spaces work', () => {
