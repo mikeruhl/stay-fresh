@@ -51,7 +51,7 @@ function main() {
   if (isOff(process.env.STAY_FRESH) || isCi(process.env.CI)) return;
   const input = JSON.parse(readFileSync(0, 'utf8'));
   const config = loadConfig({ projectDir: input.cwd, homeDir: homedir() });
-  if (!config.enabled) return;
+  if (config._invalid || !config.enabled) return;
   const hit = trigger(input, config);
   if (!hit) return;
   const allowed = shouldInject({

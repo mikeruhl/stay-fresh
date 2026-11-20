@@ -4,7 +4,7 @@ Project file: `.stay-fresh.json` in the project root (safe to commit as team def
 User file: `~/.claude/stay-fresh.json`.
 Load order: defaults, project file, user file. The user file wins. The individual always has the final say: no setting can be locked by a project file.
 
-An invalid or unreadable file is ignored.
+A missing file is fine. A file that exists but is not valid JSON makes the hooks inject nothing until it is fixed, so a typo can never leave an off switch half working. The other layers still load.
 
 ## Fields
 
@@ -30,7 +30,7 @@ An invalid or unreadable file is ignored.
 
 - Objects deep-merge.
 - `scope` from a later layer replaces the earlier value.
-- `integrations` entries merge by `id`, and the later layer's entry wins.
+- `integrations` entries merge by `id`, field by field, and the later layer wins each field. To turn one off, set `{ "id": "speckit", "disabled": true }`. An entry with no `prompt` never matches typed commands, and one with no `skill` never matches agent-invoked skills.
 - All other arrays and scalars are replaced.
 
 ## Turning the hooks off

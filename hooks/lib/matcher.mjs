@@ -1,6 +1,7 @@
 const SKIP_PHRASE = /\bskip pair mode\b/i;
 
 function compile(source) {
+  if (typeof source !== 'string' || source === '') return null;
   try {
     return new RegExp(source, 'i');
   } catch {
@@ -11,6 +12,7 @@ function compile(source) {
 function firstMatch(text, integrations, field) {
   if (typeof text !== 'string' || text === '') return null;
   for (const integration of integrations) {
+    if (integration.disabled === true) continue;
     const pattern = compile(integration[field]);
     if (pattern && pattern.test(text)) return integration;
   }

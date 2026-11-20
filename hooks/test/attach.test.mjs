@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -72,11 +72,14 @@ test('malformed and empty stdin produce no output and exit 0', () => {
   assert.deepEqual(Object.values(run('', s)), [0, '']);
 });
 
-test('invalid project config JSON does not break injection', () => {
+test('invalid config JSON fails safe with no injection, in either layer', () => {
   const s = sandbox();
-  writeFileSync(join(s.cwd, '.stay-fresh.json'), '{ broken');
-  const r = run(prompt(s.cwd, '/opsx:apply'), s);
-  assert.match(JSON.parse(r.out).hookSpecificOutput.additionalContext, /attached to openspec/);
+  writeFileSync(join(s.cwd, '.stay-fresh.json'), '{"enabled": false,}');
+  assert.deepEqual(Object.values(run(prompt(s.cwd, '/opsx:apply'), s)), [0, '']);
+  const t = sandbox();
+  mkdirSync(join(t.home, '.claude'), { recursive: true });
+  writeFileSync(join(t.home, '.claude', 'stay-fresh.json'), '{ broken');
+  assert.deepEqual(Object.values(run(prompt(t.cwd, '/opsx:apply'), t)), [0, '']);
 });
 
 test('agent-invoked framework skill injects with the PreToolUse event name', () => {

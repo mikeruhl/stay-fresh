@@ -74,13 +74,27 @@ test('integrations merge by id with the user entry winning', () => {
   assert.ok(byId.openspec);
 });
 
-test('invalid JSON in a layer is ignored and the other layers still apply', () => {
+test('an integration override merges field by field over the default entry', () => {
+  const s = sandbox();
+  s.writeUser({ integrations: [{ id: 'speckit', disabled: true }] });
+  const speckit = loadConfig(s).integrations.find((i) => i.id === 'speckit');
+  assert.equal(speckit.disabled, true);
+  assert.equal(speckit.prompt, DEFAULTS.integrations[0].prompt);
+  assert.equal(speckit.tasks, DEFAULTS.integrations[0].tasks);
+});
+
+test('invalid JSON in a layer is flagged and the other layers still apply', () => {
   const s = sandbox();
   s.writeProject('{ not json');
   s.writeUser({ share: 25 });
   const cfg = loadConfig(s);
+  assert.equal(cfg._invalid, true);
   assert.equal(cfg.share, 25);
   assert.equal(cfg.enabled, true);
+});
+
+test('missing files are not flagged as invalid', () => {
+  assert.equal('_invalid' in loadConfig(sandbox()), false);
 });
 
 test('project directories containing spaces work', () => {

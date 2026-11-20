@@ -44,6 +44,25 @@ test('invalid regex sources are skipped instead of thrown', () => {
   assert.equal(matchSkill('openspec-apply-change', bad).id, 'openspec');
 });
 
+test('an entry with a missing or empty pattern never matches', () => {
+  const partial = [
+    { id: 'noskill', prompt: '^/myfw-build', tasks: 'x' },
+    { id: 'noprompt', skill: '^myfw$', tasks: 'x' },
+    { id: 'empty', prompt: '', skill: '', tasks: 'x' },
+  ];
+  assert.equal(matchPrompt('fix the login bug', partial), null);
+  assert.equal(matchSkill('superpowers:brainstorming', partial), null);
+  assert.equal(matchPrompt('/myfw-build now', partial).id, 'noskill');
+  assert.equal(matchSkill('myfw', partial).id, 'noprompt');
+});
+
+test('a disabled entry never matches', () => {
+  const off = [{ ...integrations[0], disabled: true }, integrations[1]];
+  assert.equal(matchPrompt('/speckit-implement', off), null);
+  assert.equal(matchSkill('speckit-implement', off), null);
+  assert.equal(matchPrompt('/opsx:apply', off).id, 'openspec');
+});
+
 test('hasSkipPhrase matches the whole phrase case-insensitively', () => {
   assert.equal(hasSkipPhrase('/speckit-implement skip pair mode'), true);
   assert.equal(hasSkipPhrase('Skip Pair Mode please'), true);

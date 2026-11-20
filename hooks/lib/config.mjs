@@ -33,7 +33,9 @@ const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArr
 function mergeIntegrations(base, layer) {
   const merged = new Map(base.map((i) => [i.id, i]));
   for (const entry of layer) {
-    if (isPlainObject(entry) && typeof entry.id === 'string') merged.set(entry.id, entry);
+    if (isPlainObject(entry) && typeof entry.id === 'string') {
+      merged.set(entry.id, { ...merged.get(entry.id), ...entry });
+    }
   }
   return [...merged.values()];
 }
@@ -53,16 +55,24 @@ function merge(base, layer) {
 }
 
 function readLayer(path) {
+  let text;
   try {
-    const parsed = JSON.parse(readFileSync(path, 'utf8'));
-    return isPlainObject(parsed) ? parsed : {};
+    text = readFileSync(path, 'utf8');
   } catch {
-    return {};
+    return { data: {}, invalid: false };
+  }
+  try {
+    const parsed = JSON.parse(text);
+    return isPlainObject(parsed) ? { data: parsed, invalid: false } : { data: {}, invalid: true };
+  } catch {
+    return { data: {}, invalid: true };
   }
 }
 
 export function loadConfig({ projectDir, homeDir }) {
   const project = readLayer(join(projectDir, '.stay-fresh.json'));
   const user = readLayer(join(homeDir, '.claude', 'stay-fresh.json'));
-  return merge(merge(structuredClone(DEFAULTS), project), user);
+  const merged = merge(merge(structuredClone(DEFAULTS), project.data), user.data);
+  if (project.invalid || user.invalid) merged._invalid = true;
+  return merged;
 }
