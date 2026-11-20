@@ -1,0 +1,10 @@
+{
+  "name": "stay-fresh",
+  "version": "0.1.0",
+  "description": "Pair-programming skills that keep engineers writing code by hand: handoffs, katas, and repo tours, with automatic attach to SpecKit and OpenSpec task lists.",
+  "author": { "name": "Mike Ruhl" },
+  "homepage": "https://github.com/mikeruhl/stay-fresh",
+  "repository": "https://github.com/mikeruhl/stay-fresh",
+  "license": "MIT",
+  "keywords": ["pair-programming", "kata", "speckit", "openspec", "code-review"]
+}
