@@ -23,7 +23,8 @@ export function shouldInject({ stateDir, sessionId, triggerId, now = Date.now() 
     if (key in injected) return false;
     injected[key] = now;
     mkdirSync(stateDir, { recursive: true });
-    writeFileSync(file, JSON.stringify({ ...state, injected }, null, 2));
+    writeFileSync(join(stateDir, '.gitignore'), '*\n');
+    writeFileSync(file,JSON.stringify({ ...state, injected }, null, 2));
     return true;
   } catch {
     return false;

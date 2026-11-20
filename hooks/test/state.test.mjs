@@ -44,6 +44,12 @@ test('existing areas entries survive an injection', () => {
   assert.ok(saved.injected['s1|speckit']);
 });
 
+test('the state directory ignores itself in git', () => {
+  const dir = freshDir();
+  assert.equal(shouldInject(args(dir)), true);
+  assert.equal(readFileSync(join(dir, '.gitignore'), 'utf8').trim(), '*');
+});
+
 test('a corrupt state file is treated as empty', () => {
   const dir = freshDir();
   mkdirSync(dir, { recursive: true });
