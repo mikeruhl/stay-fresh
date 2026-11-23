@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, parse } from 'node:path';
 import { findProjectRoot } from '../lib/root.mjs';
 
 const tmp = () => mkdtempSync(join(tmpdir(), 'sf root '));
@@ -41,4 +41,27 @@ test('an empty CLAUDE_PROJECT_DIR is ignored', () => {
   const sub = join(base, 'x');
   mkdirSync(sub);
   assert.equal(findProjectRoot({ cwd: sub, env: { CLAUDE_PROJECT_DIR: '' } }), base);
+});
+
+test('the walk stops below the home directory even when home is a git repo', () => {
+  const home = tmp();
+  mkdirSync(join(home, '.git'));
+  const sub = join(home, 'scratch', 'x');
+  mkdirSync(sub, { recursive: true });
+  assert.equal(findProjectRoot({ cwd: sub, env: {}, homeDir: home }), sub);
+});
+
+test('the home directory itself can be the project root', () => {
+  const home = tmp();
+  mkdirSync(join(home, '.git'));
+  assert.equal(findProjectRoot({ cwd: home, env: {}, homeDir: home }), home);
+});
+
+test('a drive or filesystem root resolves to itself', () => {
+  const root = parse(tmpdir()).root;
+  assert.equal(typeof findProjectRoot({ cwd: root, env: {} }), 'string');
+});
+
+test('a missing cwd falls back to the process directory', () => {
+  assert.equal(typeof findProjectRoot({ cwd: undefined, env: {} }), 'string');
 });

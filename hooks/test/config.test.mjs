@@ -23,12 +23,11 @@ test('no config files yields the defaults', () => {
 });
 
 test('defaults carry the documented values', () => {
-  assert.equal(DEFAULTS.enabled, true);
-  assert.equal(DEFAULTS.share, 'pivotal');
+  assert.equal(DEFAULTS.enabled, false);
   assert.equal(DEFAULTS.max_lines_per_handoff, 30);
-  assert.equal(DEFAULTS.max_handoffs_per_run, 3);
   assert.equal(DEFAULTS.kata.suggest, 'off');
   assert.equal(DEFAULTS.kata.after_handoffs, 3);
+  assert.equal(DEFAULTS.tour.suggest, 'off');
   assert.equal(DEFAULTS.tour.max_questions, 3);
   assert.equal(DEFAULTS.test_command, undefined);
   assert.deepEqual(DEFAULTS.integrations.map((i) => i.id), ['speckit', 'openspec']);
@@ -36,9 +35,9 @@ test('defaults carry the documented values', () => {
 
 test('project file overrides a default and leaves the rest intact', () => {
   const s = sandbox();
-  s.writeProject({ share: 40 });
+  s.writeProject({ include: ['parser'] });
   const cfg = loadConfig(s);
-  assert.equal(cfg.share, 40);
+  assert.deepEqual(cfg.include, ['parser']);
   assert.equal(cfg.max_lines_per_handoff, 30);
 });
 
@@ -57,21 +56,21 @@ test('nested objects deep-merge', () => {
   assert.equal(cfg.kata.suggest, 'off');
 });
 
-test('scope from the user file replaces the project value', () => {
+test('arrays from a later layer replace the earlier value', () => {
   const s = sandbox();
-  s.writeProject({ scope: ['b'] });
-  s.writeUser({ scope: ['a'] });
-  assert.deepEqual(loadConfig(s).scope, ['a']);
+  s.writeProject({ exclude: ['b'] });
+  s.writeUser({ exclude: ['a'] });
+  assert.deepEqual(loadConfig(s).exclude, ['a']);
 });
 
-test('integrations merge by id with the user entry winning', () => {
+test('project integrations are ignored and user integrations merge by id', () => {
   const s = sandbox();
-  s.writeProject({ integrations: [{ id: 'x', prompt: '^/x', skill: '^x$', tasks: 'x/*.md' }] });
-  s.writeUser({ integrations: [{ id: 'speckit', prompt: '^/mine', skill: '^mine$', tasks: 'mine/*.md' }] });
+  s.writeProject({ integrations: [{ id: 'x', prompt: '^/x', tasks: 'x/*.md' }, { id: 'openspec', prompt: '^' }] });
+  s.writeUser({ integrations: [{ id: 'speckit', prompt: '^/mine', tasks: 'mine/*.md' }] });
   const byId = Object.fromEntries(loadConfig(s).integrations.map((i) => [i.id, i]));
-  assert.ok(byId.x);
+  assert.equal(byId.x, undefined);
+  assert.equal(byId.openspec.prompt, DEFAULTS.integrations[1].prompt);
   assert.equal(byId.speckit.prompt, '^/mine');
-  assert.ok(byId.openspec);
 });
 
 test('an integration override merges field by field over the default entry', () => {
@@ -86,11 +85,10 @@ test('an integration override merges field by field over the default entry', () 
 test('invalid JSON in a layer is flagged and the other layers still apply', () => {
   const s = sandbox();
   s.writeProject('{ not json');
-  s.writeUser({ share: 25 });
+  s.writeUser({ max_lines_per_handoff: 20 });
   const cfg = loadConfig(s);
   assert.equal(cfg._invalid, true);
-  assert.equal(cfg.share, 25);
-  assert.equal(cfg.enabled, true);
+  assert.equal(cfg.max_lines_per_handoff, 20);
 });
 
 test('missing files are not flagged as invalid', () => {
@@ -99,6 +97,6 @@ test('missing files are not flagged as invalid', () => {
 
 test('project directories containing spaces work', () => {
   const s = sandbox('sf config spaces');
-  s.writeProject({ enabled: false });
-  assert.equal(loadConfig(s).enabled, false);
+  s.writeProject({ enabled: true });
+  assert.equal(loadConfig(s).enabled, true);
 });

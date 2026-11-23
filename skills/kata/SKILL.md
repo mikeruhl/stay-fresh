@@ -5,7 +5,7 @@ description: Use when the engineer asks for a coding kata or practice exercise, 
 
 # Kata
 
-A short exercise the engineer solves by hand. The agent sets it up, then coaches. Read `${CLAUDE_PLUGIN_ROOT}/shared/coaching-protocol.md` first. Katas are never suggested from this skill. Offers come from `pair-mode` or a session hook according to `kata.suggest`.
+A short exercise the engineer solves by hand. The agent sets it up, then coaches. Read `${CLAUDE_PLUGIN_ROOT}/shared/coaching-protocol.md` first. Katas are never suggested from this skill. Offers come only from `pair-mode` according to `kata.suggest`.
 
 Load `kata.source` from `~/.claude/stay-fresh.json` over `.stay-fresh.json`. Default is `"repo"`.
 

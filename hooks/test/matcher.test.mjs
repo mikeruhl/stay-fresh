@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DEFAULTS } from '../lib/config.mjs';
-import { matchPrompt, matchSkill, hasSkipPhrase, skillNameFromInput } from '../lib/matcher.mjs';
+import { matchPrompt, hasSkipPhrase } from '../lib/matcher.mjs';
 
 const integrations = DEFAULTS.integrations;
 
@@ -27,40 +27,30 @@ test('matchPrompt ignores near misses', () => {
   assert.equal(matchPrompt('/speckit-plan', integrations), null);
 });
 
-test('matchSkill recognizes bare and plugin-prefixed skill names', () => {
-  assert.equal(matchSkill('speckit-implement', integrations).id, 'speckit');
-  assert.equal(matchSkill('some-plugin:speckit-implement', integrations).id, 'speckit');
-  assert.equal(matchSkill('openspec-apply-change', integrations).id, 'openspec');
-});
-
-test('matchSkill ignores unrelated skills', () => {
-  assert.equal(matchSkill('superpowers:brainstorming', integrations), null);
-  assert.equal(matchSkill('', integrations), null);
-});
-
 test('invalid regex sources are skipped instead of thrown', () => {
-  const bad = [{ id: 'bad', prompt: '(', skill: '(', tasks: 'x' }, ...integrations];
+  const bad = [{ id: 'bad', prompt: '^(', tasks: 'x' }, ...integrations];
   assert.equal(matchPrompt('/opsx:apply', bad).id, 'openspec');
-  assert.equal(matchSkill('openspec-apply-change', bad).id, 'openspec');
 });
 
-test('an entry with a missing or empty pattern never matches', () => {
+test('unanchored, missing, or empty patterns never match', () => {
   const partial = [
-    { id: 'noskill', prompt: '^/myfw-build', tasks: 'x' },
-    { id: 'noprompt', skill: '^myfw$', tasks: 'x' },
-    { id: 'empty', prompt: '', skill: '', tasks: 'x' },
+    { id: 'unanchored', prompt: '/myfw-build', tasks: 'x' },
+    { id: 'missing', tasks: 'x' },
+    { id: 'empty', prompt: '', tasks: 'x' },
   ];
+  assert.equal(matchPrompt('please /myfw-build', partial), null);
+  assert.equal(matchPrompt('/myfw-build', partial), null);
   assert.equal(matchPrompt('fix the login bug', partial), null);
-  assert.equal(matchSkill('superpowers:brainstorming', partial), null);
-  assert.equal(matchPrompt('/myfw-build now', partial).id, 'noskill');
-  assert.equal(matchSkill('myfw', partial).id, 'noprompt');
 });
 
 test('a disabled entry never matches', () => {
   const off = [{ ...integrations[0], disabled: true }, integrations[1]];
   assert.equal(matchPrompt('/speckit-implement', off), null);
-  assert.equal(matchSkill('speckit-implement', off), null);
   assert.equal(matchPrompt('/opsx:apply', off).id, 'openspec');
+});
+
+test('non-string prompts never match', () => {
+  assert.equal(matchPrompt(undefined, integrations), null);
 });
 
 test('hasSkipPhrase matches the whole phrase case-insensitively', () => {
@@ -68,13 +58,4 @@ test('hasSkipPhrase matches the whole phrase case-insensitively', () => {
   assert.equal(hasSkipPhrase('Skip Pair Mode please'), true);
   assert.equal(hasSkipPhrase('skipping pairs'), false);
   assert.equal(hasSkipPhrase('skip pair modes'), false);
-});
-
-test('skillNameFromInput tolerates unknown input shapes', () => {
-  assert.equal(skillNameFromInput({ skill: 'a' }), 'a');
-  assert.equal(skillNameFromInput({ name: 'b' }), 'b');
-  assert.equal(skillNameFromInput({ command: 'c' }), 'c');
-  assert.equal(skillNameFromInput({ other: 'd', n: 1 }), 'd');
-  assert.equal(skillNameFromInput({}), '');
-  assert.equal(skillNameFromInput(undefined), '');
 });

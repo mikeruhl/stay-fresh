@@ -1,10 +1,10 @@
 # Pivotal selection
 
-Decides which work goes to the engineer and which stays with the agent.
+Decides, per task, whether the engineer writes it by hand or the agent does.
 
 ## The test
 
-A piece is handed to the engineer only if it contains a decision: a domain rule, branching or recursion, an invariant, an error path, concurrency, or security-relevant behavior. Anything the engineer's `scope` covers is also offered.
+A piece is handed to the engineer only if it contains a decision: a domain rule, branching or recursion, an invariant, an error path, concurrency, or security-relevant behavior. If few tasks qualify, the engineer gets few handoffs, and that is fine.
 
 ## Kept with the agent by default
 
@@ -19,20 +19,11 @@ A piece is handed to the engineer only if it contains a decision: a domain rule,
 
 The agent writes the scaffolding and hands only the decision-bearing slice. Example: the agent scaffolds a service class, the engineer writes the method body that applies the business rule.
 
-## Building the split plan
-
-1. Rank tasks by how much decision they contain.
-2. Put tasks touching `scope` first. They are exempt from `max_handoffs_per_run`.
-3. Assign from the top until the estimated `share` is met or `max_handoffs_per_run` is reached. `share` is a heuristic: pivotal ranking and `max_lines_per_handoff` win over it. If few tasks are pivotal, the engineer gets fewer asks and the plan says so.
-4. Name tasks deferred to the agent because of the cap, with the reason.
-5. Give one reason per task, for both assignments.
-6. Show the plan for approval only when 2 or more tasks go to the engineer. With 0 or 1, announce the single handoff when it arrives.
-
-The engineer can move any task either way.
+The engineer can move any task either way, at any time.
 
 ## Tuning
 
-`exclude` and `include` take task-text keywords and path globs and override the defaults above. When the engineer says a kind of work is not worth their time, offer to record it as an `exclude`. When they want to keep a simple flow fresh, an `include` opts that kind back in.
+`exclude` and `include` take task-text keywords and path globs and override the defaults above. When the engineer says a kind of work is not worth their time, offer to record it as an `exclude`. When they want to keep a simple flow or an area fresh, an `include` opts it in.
 
 ## Flow walk
 

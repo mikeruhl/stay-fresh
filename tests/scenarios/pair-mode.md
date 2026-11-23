@@ -11,12 +11,14 @@ Shared fixture F1: a TypeScript repo `inventory-service` with tests run by `npm 
 ```
 
 Hook context present in S1 to S5, S7 to S9, S11, S12 (as injected by the stay-fresh hook):
-`stay-fresh: pair-mode attached to openspec. Say "skip pair mode" to turn this off. Pair mode is active for this openspec run. Its task files match openspec/changes/*/tasks.md. The stay-fresh:pair-mode skill describes how the tasks are split between the engineer and the agent.`
+`stay-fresh: pair-mode attached to openspec. Say "skip pair mode" to turn this off. Its task files match openspec/changes/*/tasks.md. The stay-fresh:pair-mode skill describes which tasks the engineer writes by hand while the framework skill runs.`
+
+Re-verification needed: the results sections below were recorded before the 2026-11-23 self-review, which replaced the split plan with an overlay on the framework skill. S9 and S10 were rewritten and have not been run yet.
 
 ## S1 Handoff stops
 
 Setup: F1. Engineer types `/opsx:apply`.
-Pass: the agent classifies 1.2 as the engineer's (decision, recursion) and 1.1 and 1.3 as its own, with a reason per task; states a contract for 1.2 (a failing test it writes, since `npm test` exists); does NOT write the body of `hasAvailableVariant`; ends its turn asking the engineer to write it and say "done".
+Pass: the agent says in one line that it expects to hand over 1.2 (decision, recursion); does 1.1 and ticks it; at 1.2 states a contract for 1.2 (a failing test it writes, since `npm test` exists); does NOT write the body of `hasAvailableVariant`; ends its turn asking the engineer to write it and say "done".
 
 ## S2 Boilerplate stays with the agent
 
@@ -30,7 +32,7 @@ Pass: the agent gives the full working implementation with a short explanation a
 
 ## S4 Done with no change
 
-Setup: handoff of 1.2 is open, recorded HEAD abc123, `src/stock/variants.ts` unchanged since. Engineer says: "done".
+Setup: handoff of 1.2 is open, recorded `hash` h1, `src/stock/variants.ts` unchanged since. Engineer says: "done".
 Pass: the agent checks the file or diff, reports that nothing changed since the handoff, and waits. It does not review or tick the task.
 
 ## S5 Inverted split
@@ -53,15 +55,15 @@ Pass: the agent says it found no task file and asks which work to split. It does
 Setup: F1 with extra task `1.4 Rename ProductDto to ProductData across the repo`. Engineer says: "give me 1.4 too".
 Pass: the agent may decline with a one-line reason ("mechanical rename, I'll take this one") and offers an alternative such as a flow walk or an `include`.
 
-## S9 Handoff cap and scope exemption
+## S9 Framework owns the task file
 
-Setup: six independent pivotal tasks, none in `scope`; `max_handoffs_per_run` is 3. Then a variant: one extra pivotal task under a path listed in `scope`.
-Pass: at most 3 handoffs are assigned, the plan names the deferred tasks with reasons. In the variant the `scope` task is handed over in addition and listed first.
+Setup: F1. Engineer types `/opsx:apply`. Inspect every write the agent makes to `openspec/changes/variant-stock/tasks.md`.
+Pass: the only edits are ticks, in the framework's order, and 1.2 is not ticked while its handoff is open. No owner labels, notes, or new tasks are added to the file.
 
-## S10 Approval gate threshold
+## S10 Take the rest
 
-Setup A: exactly one pivotal task. Setup B: two pivotal tasks.
-Pass: A has no approval gate and announces the single handoff inline. B shows a split plan and asks for approval before starting.
+Setup: six pivotal tasks; the first handoff has just been reviewed and closed. Engineer says: "take the rest".
+Pass: the agent finishes the remaining tasks itself with no further handoffs, ticking each as the framework would, and shows no split plan or approval step.
 
 ## S11 Test-first contract
 
@@ -106,7 +108,7 @@ Pass: A offers a kata once, in one line, after closing. B does not offer while t
 ## S14 Tour offer on attach (added with the repo-tour skill)
 
 Setup: F1, `tour.suggest` is `"on-attach"`. Engineer types `/opsx:apply`.
-Pass: a one-line refresher offer for the touched modules (for example `src/stock`) with a way to skip, then the split plan continues without waiting if the engineer ignores it. With `tour.suggest: "off"` no offer.
+Pass: a one-line refresher offer for the touched modules (for example `src/stock`) with a way to skip, then the work continues without waiting if the engineer ignores it. With `tour.suggest: "off"` no offer.
 
 ## With skill, second round (S1, S13, S14 after adding the tour offer and kata nudge)
 
@@ -114,13 +116,13 @@ All met their Pass criteria: one-line refresher offer on attach with a skip path
 
 ## S4b Done but unchanged, with an uncommitted stub (added after the final review)
 
-Setup: F1. The handoff of 1.2 was recorded with `head` abc123 and `hash` h1. The agent's stub and failing test are uncommitted, so `git diff abc123 -- src/stock/variants.ts` is not empty: it shows the agent's own stub. The engineer says "done". `git hash-object src/stock/variants.ts` prints h1.
+Setup: F1. The handoff of 1.2 was recorded with `hash` h1. The agent's stub and failing test are uncommitted, so `git diff HEAD -- src/stock/variants.ts` is not empty: it shows the agent's own stub. The engineer says "done". `git hash-object src/stock/variants.ts` prints h1.
 Pass: the agent computes the hash, sees it matches the recorded one, tells the engineer nothing changed since the handoff, and waits. It does not review the stub and does not tick the task.
 
 ## S15 Relay the announcement (added after the final review)
 
 Setup: F1. Hook context present: `stay-fresh: pair-mode attached to openspec. Say "skip pair mode" to turn this off. ...`. The engineer types `/opsx:apply`.
-Pass: the agent's first output to the engineer repeats that pair mode is attached and that "skip pair mode" turns it off, in one sentence, before the split plan.
+Pass: the agent's first output to the engineer repeats that pair mode is attached and that "skip pair mode" turns it off, in one sentence, before any other work.
 
 ## With skill, after the final review (S4b, S15)
 

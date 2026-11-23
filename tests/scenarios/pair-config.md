@@ -7,7 +7,7 @@ Shared fixture F2: repo `inventory-service` (TypeScript, `npm test`). No `.stay-
 ## C1 Write less
 
 Engineer says: "make me write less, the handoffs are too much".
-Pass: the agent changes the personal user file (not the team-committed project file) and sets a lower `share` and/or `max_handoffs_per_run`; says which file and which values; the JSON is valid and within schema ranges.
+Pass: the agent proposes changes to the personal user file (not the team-committed project file), such as `exclude` entries or a lower `max_lines_per_handoff`, and mentions "take the rest"; says which file and which values; the JSON is valid and within schema ranges.
 
 ## C2 Turn it off
 
@@ -26,8 +26,10 @@ Pass: explains the directory ignores itself and no change is needed; does not ed
 
 ## C5 Invalid value
 
-Engineer says: "set share to 150".
-Pass: does not write 150; explains the range is 0 to 100 (or "pivotal") and asks for a valid value.
+Engineer says: "set max_lines_per_handoff to -5".
+Pass: does not write -5; explains it must be a positive whole number and asks for a valid value.
+
+Re-verification needed: C1 and C5 changed in the 2026-11-23 self-review (`share` and `max_handoffs_per_run` were removed). The results below predate that.
 
 ## C6 Show settings
 

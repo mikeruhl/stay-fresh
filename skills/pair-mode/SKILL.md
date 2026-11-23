@@ -1,56 +1,46 @@
 ---
 name: pair-mode
-description: Use when the engineer wants to write part of a change by hand, asks to pair program, or a stay-fresh hook says pair mode is attached to a SpecKit or OpenSpec task list.
+description: Use when the engineer wants to write part of a change by hand, asks to pair program, or a stay-fresh hook says pair mode is attached to a task-runner command such as SpecKit implement or OpenSpec apply.
 ---
 
 # Pair mode
 
-The agent does most of the work. The engineer writes the pieces that contain decisions, so their judgment about code stays sharp. Coaching is the default. The engineer can always ask for the answer.
+Pair mode sits on top of whatever is driving the work: a framework's apply or implement skill, or a change the engineer described. That driver keeps its own task order, task file, and ticking. Pair mode only decides, task by task, whether the engineer writes a piece by hand. It never adds tasks or writes who owns what into a task file. Coaching is the default. The engineer can always ask for the answer.
 
 Read before starting:
 - `${CLAUDE_PLUGIN_ROOT}/shared/pivotal-selection.md` for what goes to the engineer
 - `${CLAUDE_PLUGIN_ROOT}/shared/coaching-protocol.md` for the ladder and the review procedure
-- `${CLAUDE_PLUGIN_ROOT}/shared/config-schema.md` for config and state locations
+- `${CLAUDE_PLUGIN_ROOT}/shared/config-schema.md` for the state file and setting defaults
 
-Load config from `~/.claude/stay-fresh.json` over `.stay-fresh.json` over the defaults in the schema. If the engineer says "skip pair mode", stop using this skill and do the work normally.
+Settings this skill reads: `include`, `exclude`, `max_lines_per_handoff`, `test_command`, `tour.suggest`, `kata.suggest`, `kata.after_handoffs`. Take each from `~/.claude/stay-fresh.json`, else `.stay-fresh.json`, else the schema default.
 
-## 1. Announce, then find the work
+If the engineer says "skip pair mode" at any point, stop using this skill and let the driver finish normally.
 
-Announce first. When the hook context contains a line starting `stay-fresh: pair-mode attached`, repeat it to the engineer as your first output, in one sentence, including that they can say "skip pair mode" to turn this off. The engineer cannot see hook context.
+## 1. Announce
 
-Use the task file named by the hook context (a glob such as `openspec/changes/*/tasks.md` or `specs/*/tasks.md`), or the work the engineer described.
+When the hook context contains a line starting `stay-fresh: pair-mode attached`, repeat it to the engineer as your first output, in one sentence, including that they can say "skip pair mode" to turn this off. The engineer cannot see hook context.
 
-If no task file exists, say so and ask which work to split. Do not invent tasks.
+When `tour.suggest` is `on-attach`, offer a refresher in one line, for example "Want a 3-question refresher on `src/stock` first? Say 'skip' to go straight on." Run `stay-fresh:repo-tour` only if they accept. Do not wait on anything else before continuing.
 
-## 2. Build the split plan
+Then say in one line which upcoming tasks you expect to hand over, if any, so the engineer can move a task either way. No table and no approval step.
 
-When `tour.suggest` is `on-attach`, first offer a refresher in one line, for example "Want a 3-question refresher on `src/stock` first? Say 'skip' to go straight to the plan." Run `stay-fresh:repo-tour` for the modules these tasks touch only if they accept. Do not wait on anything else before continuing.
+## 2. Follow the driver
 
-Follow "Building the split plan" in `pivotal-selection.md`. Present it as a table:
+Work the tasks in the driver's order, the way its own skill says to. Before implementing each task, apply the test in `pivotal-selection.md`:
 
-| Task | Owner | Why |
-|---|---|---|
+- No decision: implement it as the driver normally would, including ticking it.
+- A decision: hand it off (section 3) instead of implementing it. For a mixed task, write the scaffolding and hand off only the decision-bearing slice.
 
-Rules:
-- Every row has a reason in a full phrase, for the agent's rows too ("mechanical DTO field, no decision", "recursion over nested variants").
-- Tasks under `scope` are exempt from `max_handoffs_per_run`, listed first, and never counted against the cap.
-- Tasks beyond the cap stay with the agent, and the plan says "deferred by the cap" for each.
-- Two or more engineer rows: show the plan and wait for approval or edits. Zero or one: no approval step, announce the single handoff when it arrives.
+With no driver and no task file, use the work the engineer described. If neither exists, ask which work to split. Do not invent tasks.
 
-## 3. Do the agent's tasks
-
-Work the agent's tasks that the engineer's piece does not depend on. Tick each task in the task file as the framework's own skill would.
-
-## 4. Hand off one piece
-
-Hand off one piece at a time, never several at once. For each:
+## 3. Hand off one piece
 
 1. **Contract.** If the repo has a test setup, write the failing test that expresses the contract and run it to confirm it fails for the right reason. Without a test setup, state a prose contract: inputs, outputs, and the cases that must hold. Do not ask about adding test tooling.
 2. **Stub.** Leave the function or region as a stub marked `TODO(stay-fresh)`. Do not write the implementation.
-3. **Record.** Write the handoff to `.stay-fresh/state.json` under `handoff`: `file`, `anchor`, `contract`, the current git `head`, and `hash`, the output of `git hash-object <file>` taken after the stub and the failing test are written (a sha256 of the file when git is unavailable). Create `.stay-fresh/` with a `.gitignore` containing `*` if it does not exist. Preserve the other keys in the file.
-4. **Stop.** Tell the engineer the file, the anchor, and the contract. Ask them to write it and say "done". End the turn. Keep the piece within `max_lines_per_handoff`.
+3. **Record.** Write the handoff to `.stay-fresh/state.json` under `handoff`: `file`, `anchor`, `contract`, and `hash`, the output of `git hash-object <file>` taken after the stub and the failing test are written (a sha256 of the file when git is unavailable). Create `.stay-fresh/` with a `.gitignore` containing `*` if it does not exist. Preserve the other keys in the file.
+4. **Stop.** Do not tick the task. Tell the engineer the file, the anchor, and the contract. Ask them to write it and say "done". End the turn. Keep the piece within `max_lines_per_handoff`.
 
-## 5. Review when they say done
+## 4. Review when they say done
 
 Follow "Reviewing the engineer's code" in `coaching-protocol.md`. The first reply to a failing result is a question about the failing case, never the cause or the fix.
 
@@ -58,18 +48,19 @@ Follow "Reviewing the engineer's code" in `coaching-protocol.md`. The first repl
 |---|---|
 | "I'll say what the bug is so they can fix it faster" | Rung 1 is a question. Name the failing case, ask what they expect. |
 | "I'll tidy their code while I'm in the file" | The file is theirs. Coach, do not edit. |
-| "The cap is 3 and this is a scope task, so I'll count it" | Scope tasks are exempt. List them first, hand them over. |
 | "I'll hand several pieces so they can pick" | One handoff at a time. |
+| "I'll note the engineer's tasks in tasks.md" | The task file belongs to the driver. Ownership is only said in conversation. |
 | "Their style differs from mine" | Passing and correct is approved. Style is an optional remark after approval. |
 
-## 6. Opt-outs and inversions
+## 5. Opt-outs and inversions
 
-- Engineer says "show me" or "just do it": give the full solution with a short explanation, no more questions.
-- Engineer says "write everything but X, tell me when it's ready": do all other work, leave X as a stub with a failing test, record the handoff, tell them where it is, and stop.
+- "show me" or "just do it": give the full solution with a short explanation, no more questions.
+- "take the rest": finish the remaining tasks without further handoffs.
+- "write everything but X, tell me when it's ready": do all other work, leave X as a stub with a failing test, record the handoff, tell them where it is, and stop.
 - The agent can decline a handoff the engineer asks for: say "I'll take this one" with a one-line reason, and offer a flow walk from `repo-tour` or an `include` entry if they want practice anyway.
 
-## 7. Close the piece
+## 6. Close the piece
 
-When the review passes, say what was good in one line, tick the task, remove `handoff` from the state file, and move to the next task.
+When the review passes, say what was good in one line, remove `handoff` from the state file, then tick the task as the driver would and continue with its next task.
 
 Count completed handoffs in this conversation. When `kata.suggest` is `after-handoffs` and the count reaches `kata.after_handoffs`, offer `stay-fresh:kata` once, in one line, after the piece is closed and never while a handoff is open. With `kata.suggest` set to `off`, never offer a kata unprompted.

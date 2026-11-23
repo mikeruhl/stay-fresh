@@ -11,28 +11,28 @@ Edit stay-fresh settings conversationally. The schema is `${CLAUDE_PLUGIN_ROOT}/
 
 | Setting | File |
 |---|---|
-| Personal preferences: `enabled`, `share`, `max_lines_per_handoff`, `max_handoffs_per_run`, `scope`, `exclude`, `include`, `review_depth`, `kata.*`, `tour.*` | User file `~/.claude/stay-fresh.json` |
-| Facts about this repo or team defaults: `test_command`, `integrations` | Project file `.stay-fresh.json` in the repo root |
+| Personal preferences: `enabled`, `max_lines_per_handoff`, `exclude`, `include`, `kata.*`, `tour.*`, `integrations` | User file `~/.claude/stay-fresh.json` |
+| Facts about this repo or team defaults: `test_command` | Project file `.stay-fresh.json` in the repo root |
 
-Say which file you are changing and that the project file can be committed while the user file is private.
+Say which file you are changing and that the project file can be committed while the user file is private. `integrations` only take effect from the user file.
 
 ## Procedure
 
 1. Read both files, if they exist. Treat a missing file as `{}`.
 2. Merge the change into the existing JSON. Keep every other key. Write with 2-space indentation.
 3. Validate the value against the schema before writing:
-   - `share`: `"pivotal"` or a number from 0 to 100
-   - `max_lines_per_handoff` and `max_handoffs_per_run`: positive whole numbers
+   - `max_lines_per_handoff`: a positive whole number
    - `enabled`: true or false
-   - `review_depth`: `"coach"` or `"quick"`
    - `kata.suggest` and `tour.suggest`: values listed in the schema
-   An invalid value is not written. State the allowed range and ask for a valid value.
+   - `integrations[].prompt`: a regular expression that starts with `^`
+   An invalid value is not written. State the allowed values and ask for a valid one.
 4. After writing, show the key, the old value, the new value, and the file.
 
 ## Common requests
 
-- "Make me write less": lower `share` and/or `max_handoffs_per_run` in the user file. Propose concrete numbers and say what they change.
+- "Turn it on": set `"enabled": true` in the user file so typed integration commands attach pair mode. Mention `STAY_FRESH=on` for a single session, and that `stay-fresh:pair-mode` can always be invoked directly.
 - "Turn it off": set `"enabled": false` in the user file. Mention `STAY_FRESH=off` as the switch for a single session.
+- "Make me write less": propose `exclude` entries for the kinds of work they want to skip, or a lower `max_lines_per_handoff`. Remind them "take the rest" ends handoffs for the current run.
 - "Never hand me X": propose adding a keyword or glob to `exclude` and write it only after the engineer says yes.
 - "I want to practice X": the same, using `include`.
 - "The tests run with `<command>`": save it as `test_command` in the project file and say it can be committed.
@@ -40,4 +40,4 @@ Say which file you are changing and that the project file can be committed while
 
 ## Gitignore
 
-The `.stay-fresh/` state directory contains its own `.gitignore` that ignores everything in it. If the engineer asks whether to add it to the repo's `.gitignore`, explain that and make no edit. `.stay-fresh.json` is a normal file and is meant to be committable.
+The `.stay-fresh/` state directory contains its own `.gitignore` that ignores everything in it, written by the skill that creates the directory. If the engineer asks whether to add it to the repo's `.gitignore`, explain that and make no edit. `.stay-fresh.json` is a normal file and is meant to be committable.

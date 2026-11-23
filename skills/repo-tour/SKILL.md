@@ -1,6 +1,6 @@
 ---
 name: repo-tour
-description: Use when the engineer wants to refamiliarize themselves with the codebase, before starting a task in an area they have not touched lately, or a stay-fresh hook offers a refresher.
+description: Use when the engineer wants to refamiliarize themselves with the codebase, before starting a task in an area they have not touched lately, or pair-mode offers a refresher.
 ---
 
 # Repo tour
@@ -28,7 +28,7 @@ For "walk me through this flow", including simple ones, follow the flow from its
 
 ## Record visits
 
-When the tour ends, merge the areas where the engineer answered at least one question into `areas` in `.stay-fresh/state.json` with today's date (`YYYY-MM-DD`). Keep every other key in the file, including `injected` and `handoff`. Do not record areas the engineer skipped. Create `.stay-fresh/` with a `.gitignore` containing `*` if it does not exist.
+When the tour ends, merge the areas where the engineer answered at least one question into `areas` in `.stay-fresh/state.json` with today's date (`YYYY-MM-DD`). Keep every other key in the file, including `handoff`. Do not record areas the engineer skipped. Create `.stay-fresh/` with a `.gitignore` containing `*` if it does not exist.
 
 | Thought | Reality |
 |---|---|

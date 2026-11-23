@@ -21,7 +21,7 @@ For local development: `claude --plugin-dir <path to this repo>`.
 
 | Skill | Use it to |
 |---|---|
-| `stay-fresh:pair-mode` | Split a change between you and the agent, hand off one piece at a time, and get coached review |
+| `stay-fresh:pair-mode` | Write the decision-bearing pieces of a change by hand while the agent does the rest, one piece at a time, with coached review |
 | `stay-fresh:kata` | Practice with a small exercise derived from your repo (or a classic) |
 | `stay-fresh:repo-tour` | Refresh your map of the codebase with prediction and trace questions, or walk a flow end to end |
 | `stay-fresh:pair-config` | Change how much you write, turn stay-fresh on or off, tune what counts as boilerplate, save a test command |
@@ -30,38 +30,41 @@ Coaching is the default: question, hint, pointed hint, worked sketch, then the f
 
 Boilerplate stays with the agent by default: new properties, DTOs, class scaffolding, dependency injection wiring, config, generated code, mechanical refactors. You can opt any of it back in with `include`, for example to keep a simple flow fresh.
 
-## SpecKit and OpenSpec
+## With SpecKit, OpenSpec, or any task runner
 
-Hooks attach pair mode automatically when you run a code-producing command:
+Pair mode is optional and sits on top of the framework's own skill. The framework keeps its task order and its `tasks.md`. Pair mode only stops at tasks that contain a decision, hands them to you, and lets the framework tick them after your code passes review. Nothing about who writes what is added to the task file.
+
+Two ways to use it:
+
+1. **Per run:** invoke `/stay-fresh:pair-mode` or say "pair with me" alongside `/opsx:apply`, `/speckit-implement`, or any other run.
+2. **Automatically:** set `"enabled": true` in `~/.claude/stay-fresh.json` (or `STAY_FRESH=on` for one session). A hook then attaches pair mode when you type one of these:
 
 | Framework | Commands matched | Task file |
 |---|---|---|
 | SpecKit | `/speckit-implement`, `/speckit.implement` | `specs/*/tasks.md` |
 | OpenSpec | `/opsx:apply`, `/openspec-apply`, `/openspec-apply-change` | `openspec/changes/*/tasks.md` |
 
-Pair mode reads the task list, proposes who writes what with a reason for every task, hands off one piece at a time, and ticks tasks after review. Typed commands are the reliable path. When the agent invokes the framework skill itself, attachment is best effort.
-
-Add your own framework through `integrations` in the config.
+Add your own command through `integrations` in your user config.
 
 ## Configuration
 
 Settings live in `.stay-fresh.json` in the project root (safe to commit as team defaults) and `~/.claude/stay-fresh.json` (personal, wins over the project file). Every field is documented in [shared/config-schema.md](shared/config-schema.md). Ask `stay-fresh:pair-config` to change them for you.
 
-Main settings: `share`, `max_handoffs_per_run` (default 3), `max_lines_per_handoff` (default 30), `scope`, `exclude`, `include`, `test_command`, `kata.suggest`, `tour.suggest`.
+Main settings: `enabled` (default false), `max_lines_per_handoff` (default 30), `exclude`, `include`, `test_command`, `kata.suggest`, `tour.suggest`.
 
-## Turning the hooks off
+## Turning attachment off
 
 Any one of these stops automatic attachment:
 
-1. `"enabled": false` in either config file
+1. `"enabled": false` in the effective config (the user file wins)
 2. Environment variable `STAY_FRESH=off`
 3. The phrase "skip pair mode" in the prompt
 
-Hooks also stay silent when `CI` is set and in unattended Claude Code sessions (`claude -p`, the SDK), so scripted runs never stop at a handoff. Set `STAY_FRESH=on` to force them on anyway. They fail open: any error means no injection, and a config file that is not valid JSON also means no injection until it is fixed.
+The hook also stays silent when `CI` is set and in unattended Claude Code sessions (`claude -p`, the SDK), so scripted runs never stop at a handoff. `STAY_FRESH=on` forces it on anyway. It fails safe: any error, or a config file that is not valid JSON, means no injection. The hook never writes to your repo.
 
 ## State
 
-`.stay-fresh/` in your repo holds a small `state.json` (tour history, the open handoff, session dedupe) and katas. It contains its own `.gitignore`, so nothing in it is committed.
+`.stay-fresh/` in your repo holds a small `state.json` (tour history and the open handoff) and katas. The skills create it with its own `.gitignore`, so nothing in it is committed.
 
 ## License
 

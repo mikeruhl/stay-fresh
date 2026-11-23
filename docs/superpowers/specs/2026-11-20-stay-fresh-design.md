@@ -187,3 +187,15 @@ Public repo, MIT license (owner's call to confirm), installable as a Claude Code
 - Kata generation heuristics and how to pick a function-sized problem from a repo.
 - Testing approach for the skills (the writing-skills workflow applies) and for the hook script.
 - README content.
+
+## Decisions from the self-review (2026-11-23)
+
+These supersede the items they name. Owner's goal, restated: an option to hand-code while using a framework's apply or implement skill, kept simple and flexible, without writing hand-coding into the framework's task list.
+
+22. **Opt-in attach (supersedes goal 7, `enabled` default):** `enabled` defaults to `false`. `STAY_FRESH=on` attaches for one session. Pair mode can always be invoked directly alongside any run.
+23. **Overlay, not a second planner (supersedes call 2, decisions 12 and 13, flow step 3):** the framework skill keeps task order, its task file, and ticking. Pair mode decides per task whether to hand it off, holds the tick until review passes, and never writes ownership into the task file. `share`, `max_handoffs_per_run`, and `scope` are removed. "take the rest" ends handoffs for a run.
+24. **One hook (supersedes call 5, calls 6 and 7 for `PreToolUse`, hooks list):** only `UserPromptSubmit` is registered. `PreToolUse` and `SessionStart` are removed, and with them `kata.suggest` and `tour.suggest` values of `"session-start"`. `tour.suggest` defaults to `"off"`.
+25. **Stateless hook (supersedes call 6, call 9, State):** no session dedupe. The hook never writes to the repo. The skills create `.stay-fresh/` with its own `.gitignore` when they first need it.
+26. **Handoff identity (supersedes call 3):** the handoff records a content `hash` of the stubbed file, and "done" compares against it. `head` is not recorded.
+27. **Trust boundary:** `integrations` are read from the user file only, prompt patterns must start with `^`, a project-file `test_command` is confirmed before its first run, and the project root walk stops below the home directory.
+28. **Removed:** `review_depth` (never implemented).

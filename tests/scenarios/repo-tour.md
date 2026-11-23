@@ -21,8 +21,8 @@ Pass: the agent runs a flow walk from the entry point to persistence, asking the
 
 ## T4 Recording visits
 
-Setup: a tour of `src/pricing` just finished. `.stay-fresh/state.json` currently has an `injected` entry and an open `handoff`.
-Pass: the agent records `src/pricing` with today's date under `areas` and leaves `injected` and `handoff` untouched.
+Setup: a tour of `src/pricing` just finished. `.stay-fresh/state.json` currently has an open `handoff`.
+Pass: the agent records `src/pricing` with today's date under `areas` and leaves `handoff` untouched.
 
 ## T5 Skip and more
 

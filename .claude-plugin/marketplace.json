@@ -6,7 +6,7 @@
     {
       "name": "stay-fresh",
       "source": "./",
-      "description": "Pair-programming handoffs, katas, and repo tours that attach to SpecKit and OpenSpec task lists."
+      "description": "Pair-programming handoffs, katas, and repo tours, with optional attach to SpecKit and OpenSpec runs."
     }
   ]
 }

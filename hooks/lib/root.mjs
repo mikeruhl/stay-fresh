@@ -1,16 +1,17 @@
 import { existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 
 const MARKERS = ['.stay-fresh.json', '.git'];
 
-export function findProjectRoot({ cwd, env }) {
+const samePath = (a, b) => relative(a, b) === '';
+
+export function findProjectRoot({ cwd = process.cwd(), env, homeDir }) {
   const fromEnv = env.CLAUDE_PROJECT_DIR;
   if (typeof fromEnv === 'string' && fromEnv !== '') return fromEnv;
-  let dir = cwd;
-  for (;;) {
+  const start = resolve(cwd);
+  for (let dir = start; ; dir = dirname(dir)) {
+    if (dir !== start && homeDir && samePath(dir, homeDir)) return start;
     if (MARKERS.some((marker) => existsSync(join(dir, marker)))) return dir;
-    const parent = dirname(dir);
-    if (parent === dir) return cwd;
-    dir = parent;
+    if (dirname(dir) === dir) return start;
   }
 }

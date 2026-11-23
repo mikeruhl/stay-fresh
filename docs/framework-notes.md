@@ -21,17 +21,17 @@ Verified on 2026-11-20 with OpenSpec CLI 1.3.1, Spec Kit CLI (`specify`, current
 
 ## Default integrations
 
-| id | prompt regex | skill regex | tasks glob |
-|---|---|---|---|
-| `speckit` | `^/speckit[.-]implement\b` | `^(?:[\w-]+:)?speckit[.-]implement$` | `specs/*/tasks.md` |
-| `openspec` | `^/(?:openspec[.-]apply(?:-change)?\|opsx:apply)\b` | `^(?:[\w-]+:)?openspec-apply-change$` | `openspec/changes/*/tasks.md` |
+| id | prompt regex | tasks glob |
+|---|---|---|
+| `speckit` | `^/speckit[.-]implement\b` | `specs/*/tasks.md` |
+| `openspec` | `^/(?:openspec[.-]apply(?:-change)?\|opsx:apply)\b` | `openspec/changes/*/tasks.md` |
 
 ## Claude Code hooks
 
 - `docs`: plugin hooks file is `hooks/hooks.json` with a top-level `"hooks"` wrapper: `{ "hooks": { "<Event>": [ { "matcher": "...", "hooks": [ { "type": "command", "command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/attach.mjs"] } ] } ] } }`. Exec form (`command` plus `args`) avoids quoting problems with spaces in paths.
 - `docs`: `UserPromptSubmit` ignores `matcher`. Stdin has `session_id`, `cwd`, `hook_event_name`, `prompt`. A typed `/skill args` arrives as typed, not expanded.
 - `docs`: `PreToolUse` matcher filters on tool name; `Skill` is matchable when Claude invokes a skill (typed `/skill` bypasses `PreToolUse`). Stdin has `tool_name` and `tool_input`.
-- `unverified, tolerate`: the field in `tool_input` that names the skill is not documented. `attach.mjs` checks `tool_input.skill`, `tool_input.name`, `tool_input.command`, then any string value. Confirm empirically in the end-to-end task.
+- `unverified`: the field in `tool_input` that names the skill is not documented. This is one reason the `PreToolUse` path was removed (see the self-review section below).
 - `docs`: output is one JSON object on stdout with exit 0: `{ "hookSpecificOutput": { "hookEventName": "<Event>", "additionalContext": "<string>" } }`. For `UserPromptSubmit` plain-text stdout is also added as context. `additionalContext` is capped at 10,000 characters. For `PreToolUse` it appears next to the tool result. The docs advise writing it as factual statements rather than imperative system instructions.
 - `docs`: exit 0 with no output means no effect. Exit 2 blocks, so the hook must never exit 2. Other nonzero codes are non-blocking.
 - `docs`: `UserPromptExpansion` also exists with `command_name`, `command_args`, `prompt`, and fires for typed slash commands. Not used in v1 because `UserPromptSubmit` already receives the raw line.
@@ -63,3 +63,13 @@ Same scratch repo, run with `STAY_FRESH=on` because `claude -p` is an unattended
 - The handoff record now includes `hash` (`git hash-object` of the stubbed file).
 - Continuing the same session with "done" while the file was untouched: the agent compared the hash, reported "hasn't changed since the handoff", did not review, and left task 1.2 unticked.
 - `claude -p` prints only the final message, so the relayed announcement is checked by simulation (scenario S15), not live.
+
+## Changes from the self-review (2026-11-23)
+
+The end-to-end results above predate these changes and describe the earlier hook.
+
+- Attach is opt-in: `enabled` defaults to `false`. `STAY_FRESH=on` attaches for one session. Without attachment, `stay-fresh:pair-mode` is invoked directly.
+- Only `UserPromptSubmit` is registered. `PreToolUse` on `Skill` was removed (unverified field name, fragile matching) and so was `SessionStart` (kata and tour offers are unrelated to attaching).
+- The hook keeps no state and never writes to the repo. Session dedupe was removed: a typed command fires `UserPromptSubmit` once, and dedupe blocked a second run in the same session.
+- `integrations` are read from the user file only, and prompt patterns must start with `^`. The root walk stops below the home directory.
+- `pair-mode` no longer builds a split plan or owns the task loop. The framework skill keeps its order and ticking. Pair mode hands off decision-bearing tasks and holds the tick until review passes.
