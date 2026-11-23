@@ -20,7 +20,7 @@ If the engineer says "skip pair mode" at any point, stop using this skill and le
 
 When the hook context contains a line starting `stay-fresh: pair-mode attached`, repeat it to the engineer as your first output, in one sentence, including that they can say "skip pair mode" to turn this off. The engineer cannot see hook context.
 
-When `tour.suggest` is `on-attach`, offer a refresher in one line, for example "Want a 3-question refresher on `src/stock` first? Say 'skip' to go straight on." Run `stay-fresh:repo-tour` only if they accept. Do not wait on anything else before continuing.
+When `tour.suggest` is `on-attach`, offer a refresher in one line, for example "Want a 3-question refresher on `src/stock` first? Say 'skip' to go straight on." Do not wait for an answer: keep working in the same turn. Run `stay-fresh:repo-tour` only if they accept.
 
 Then say in one line which upcoming tasks you expect to hand over, if any, so the engineer can move a task either way. No table and no approval step.
 

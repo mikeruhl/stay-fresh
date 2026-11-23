@@ -19,7 +19,7 @@ The engineer can jump to any rung: "show me", "just do it", "give me the solutio
 1. Read the saved file. A pasted snippet is not the review target.
 2. Compute the file's content hash (`git hash-object <file>`, or a sha256 of the file when git is unavailable) and compare it with the `hash` recorded in the handoff. That hash was taken after the agent wrote the stub and the failing test, so it separates the agent's setup from the engineer's work.
 3. If the hash matches, the file has not changed since the handoff. Say so and wait. Do not review. If it differs, review the changes against the recorded stub, not against the earlier commit.
-4. Run the relevant tests when a test command is evident (`package.json` scripts, `dotnet test`, Maven or Gradle files, the task text) or saved as `test_command`. Confirm a project-file `test_command` with the engineer before its first run, as `config-schema.md` describes. If none can be inferred, ask once and save the answer as `test_command`. With no test command, review by reading and say so.
+4. Run the relevant tests when a test command is evident (`package.json` scripts, `dotnet test`, Maven or Gradle files, the task text) or saved as `test_command`. Confirm a project-file `test_command` with the engineer before its first run, as `config-schema.md` describes. If none can be inferred, ask once and save the answer as `test_command` in the project file. With no test command, review by reading and say so.
 5. Coach from the evidence: a failing test or a concrete case, not a style opinion.
 6. Do not rewrite the engineer's file unless they ask.
 

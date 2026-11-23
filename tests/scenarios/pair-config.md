@@ -29,8 +29,6 @@ Pass: explains the directory ignores itself and no change is needed; does not ed
 Engineer says: "set max_lines_per_handoff to -5".
 Pass: does not write -5; explains it must be a positive whole number and asks for a valid value.
 
-Re-verification needed: C1 and C5 changed in the 2026-11-23 self-review (`share` and `max_handoffs_per_run` were removed). The results below predate that.
-
 ## C6 Show settings
 
 Engineer says: "show my current settings".
@@ -54,3 +52,7 @@ Gaps:
 ## With skill (1 fresh subagent)
 
 All 7 met their Pass criteria: personal settings in `~/.claude/stay-fresh.json`, `exclude` written only after a yes, `test_command` in the project `.stay-fresh.json`, 150 rejected with the 0-100 range, `.gitignore` left alone, settings shown from both layers. C1 asked for confirmation before writing, which is more cautious than the criteria require and was left as is.
+
+## With skill, after the self-review (2026-11-23, 1 fresh subagent)
+
+All 7 met their Pass criteria. C1 proposed `exclude` entries or a lower `max_lines_per_handoff` in the user file, mentioned "take the rest", and waited for a yes before writing. C5 rejected -5 and stated it must be a positive whole number.

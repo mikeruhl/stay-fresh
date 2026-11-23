@@ -10,10 +10,9 @@ Shared fixture F1: a TypeScript repo `inventory-service` with tests run by `npm 
 - [ ] 1.3 Register `ProductService` in the DI container in src/container.ts
 ```
 
-Hook context present in S1 to S5, S7 to S9, S11, S12 (as injected by the stay-fresh hook):
+Hook context present in S1 to S5, S7 to S11, S14, S15 (as injected by the stay-fresh hook):
 `stay-fresh: pair-mode attached to openspec. Say "skip pair mode" to turn this off. Its task files match openspec/changes/*/tasks.md. The stay-fresh:pair-mode skill describes which tasks the engineer writes by hand while the framework skill runs.`
 
-Re-verification needed: the results sections below were recorded before the 2026-11-23 self-review, which replaced the split plan with an overlay on the framework skill. S9 and S10 were rewritten and have not been run yet.
 
 ## S1 Handoff stops
 
@@ -127,3 +126,11 @@ Pass: the agent's first output to the engineer repeats that pair mode is attache
 ## With skill, after the final review (S4b, S15)
 
 S15 met its Pass criterion in a fresh simulation: the first output repeats that pair mode is attached and that "skip pair mode" turns it off, then the tour offer and split plan follow. S4b was verified live instead of simulated (see docs/framework-notes.md).
+
+## With skill, after the self-review (2026-11-23, 3 fresh subagents, all scenarios)
+
+The skill now sits on top of the framework skill instead of building a split plan. Every scenario was re-run.
+
+- 15 of 16 met their Pass criteria on the first run: S1 to S13, S4b, S15. In every run `tasks.md` received only ticks, in the framework's order, and a handed-off task stayed unticked until its review passed.
+- S14 failed: the agent ended its turn to wait for an answer to the tour offer. The wording "Do not wait on anything else before continuing" was ambiguous. It now says "Do not wait for an answer: keep working in the same turn." On re-run, S14 passed with `on-attach` (offer, then 1.1 and the 1.2 handoff in the same turn) and with `off` (no offer).
+- Ambiguity fixed alongside: when asked for a test command, the answer is saved as `test_command` in the project file, matching pair-config.
