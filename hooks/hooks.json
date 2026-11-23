@@ -1,0 +1,17 @@
+{
+  "description": "Attach stay-fresh pair mode to configured task-runner commands such as SpecKit implement and OpenSpec apply",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/attach.mjs"],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

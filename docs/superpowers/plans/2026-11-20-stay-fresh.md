@@ -70,12 +70,12 @@ tests/scenarios/<skill>.md
 - Test: `hooks/test/manifest.test.mjs`
 
 **Interfaces:**
-- Produces: package script `npm test` running `node --test hooks/test`; plugin name `stay-fresh`.
+- Produces: package script `npm test` running `node --test`; plugin name `stay-fresh`.
 
 - [ ] **Step 1: Write the failing test** `manifest.test.mjs`: parses both manifests as JSON and asserts `plugin.name === "stay-fresh"`, `plugin.license === "MIT"`, the marketplace lists one plugin named `stay-fresh`, `package.json` has `"type": "module"`, and `LICENSE` starts with `MIT License`.
-- [ ] **Step 2: Run** `node --test hooks/test`. Expected: FAIL (files missing).
+- [ ] **Step 2: Run** `node --test`. Expected: FAIL (files missing).
 - [ ] **Step 3: Create the files.** `LICENSE`: MIT, 2026, Mike Ruhl. `package.json`: private, type module, `scripts.test` as above. `.gitignore`: `.stay-fresh/`, `node_modules/`. Manifest field names must follow the schema recorded in Task 2 (`docs/framework-notes.md`), so do Task 2 step 4 first if the schema is unknown.
-- [ ] **Step 4: Run** `node --test hooks/test`. Expected: PASS.
+- [ ] **Step 4: Run** `node --test`. Expected: PASS.
 - [ ] **Step 5: Commit** `feat: scaffold plugin manifests and license`.
 
 ### Task 2: Verify framework and Claude Code facts
@@ -177,6 +177,18 @@ tests/scenarios/<skill>.md
 - [ ] **Step 4: Run** `npm test`. Expected: PASS.
 - [ ] **Step 5: Commit** `feat: add attach hook`.
 
+### Task 6b: SessionStart offers (added during execution)
+
+**Files:**
+- Modify: `hooks/attach.mjs`, `hooks/hooks.json`
+- Test: `hooks/test/attach.test.mjs`
+
+**Interfaces:**
+- Consumes: `loadConfig`, `shouldInject`.
+- Produces: a `SessionStart` branch that injects a one-line offer for `stay-fresh:repo-tour` when `tour.suggest` is `"session-start"` and for `stay-fresh:kata` when `kata.suggest` is `"session-start"`. Silent with defaults, when disabled or off, in CI, and on repeat within a session.
+
+- [x] Tests written first, failed, then passed. Commit `feat: add SessionStart offers`.
+
 ### Task 7: Shared protocol docs
 
 **Files:**
@@ -273,7 +285,7 @@ tests/scenarios/<skill>.md
 **Interfaces:**
 - Consumes: all prior tasks.
 
-- [ ] **Step 1: Write `README.md`:** purpose and the source article, install via the marketplace file, the four skills, config reference link, the three off switches, SpecKit and OpenSpec attach behavior including the best-effort `PreToolUse` caveat from design call 5, license.
+- [ ] **Step 1: Write `README.md`:** purpose and a References section linking https://cekrem.github.io/posts/if-you-stop-writing-code-you-also-get-worse-at-reviewing-it/ (the source article, requested by the owner), install via the marketplace file, the four skills, config reference link, the three off switches, SpecKit and OpenSpec attach behavior including the best-effort `PreToolUse` caveat from design call 5, license.
 - [ ] **Step 2: Sandbox run.** In a scratch repo outside this one, create an OpenSpec-style change with a `tasks.md` of three tasks, install the plugin from this directory, type the apply command, and confirm: announcement line appears, split plan with reasons, one handoff, turn ends. Repeat with `STAY_FRESH=off` and with "skip pair mode". Record results in `docs/framework-notes.md`.
 - [ ] **Step 3: Run** `npm test`. Expected: all PASS.
 - [ ] **Step 4: Commit** `docs: add README and end-to-end results`. Ask the owner before pushing to `origin`.

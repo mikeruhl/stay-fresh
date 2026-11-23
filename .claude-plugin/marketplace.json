@@ -1,0 +1,12 @@
+{
+  "name": "stay-fresh",
+  "description": "Keep engineers engaged with code writing while AI does the heavy lifting.",
+  "owner": { "name": "Mike Ruhl" },
+  "plugins": [
+    {
+      "name": "stay-fresh",
+      "source": "./",
+      "description": "Pair-programming handoffs, katas, and repo tours, with optional attach to SpecKit and OpenSpec runs."
+    }
+  ]
+}
